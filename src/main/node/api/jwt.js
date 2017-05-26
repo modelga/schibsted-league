@@ -9,12 +9,10 @@ const tpl = token => `
       <title>JWT Token</title>
       <script>
         window.addEventListener('message', (event) => {
-          if (event.data.jwt) {
-            console.log(event.data.jwt);
-            window.localStorage('jwt', event.data.jwt);
+          if (event.data == 'ready?') {
+            event.source.postMessage({jwt: '${token}'},'*');
+            window.close();
           }
-          event.source.postMessage({jwt: '${token}'},'*');
-          window.close();
         });
       </script>
     </head>

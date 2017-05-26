@@ -12,8 +12,8 @@ const user = require('../db/user');
 
 passport.use(new GitHubStrategy(config, (accessToken, refreshToken, profile, done) => {
   const id = `github:${profile.id}`;
-  const { avatar_url, name, email } = profile._json; // eslint-disable-line
-  const userProfile = { accessToken, refreshToken, id, avatar_url: avatar_url.split('?')[0], name, email }; // split because JWT is weird
+  const { avatar_url, name, email, login } = profile._json; // eslint-disable-line
+  const userProfile = { id, avatar_url: avatar_url.split('?')[0], name: name || login, login, email, provider: 'github' }; // split because JWT is weird
   user.findById(id).then(() => {
     user.storeById(id, userProfile).then(() => {
       done(null, Object.assign({ state: 'existing' }, userProfile));

@@ -19,6 +19,9 @@ function _(name, def, t) {
 module.exports = {
   env: _('ENV', 'dev'),
   github: {
+    clientID: _('GITHUB_CLIENT_ID', 'github-client-id'),
+    clientSecret: _('GITHUB_SECRET', 'github-secret'),
+    callbackURL: _('GITHUB_REDIRECT_URI', 'http://127.0.0.1:8080/api/_github/callback'),
   },
   redis: {
     url: _('REDIS_URI', 'redis://127.0.0.1:6379'),
