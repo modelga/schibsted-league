@@ -1,4 +1,5 @@
 const config = require('../config').app;
+
 const { user } = require('../db');
 
 const setLevel = (req, res) => {

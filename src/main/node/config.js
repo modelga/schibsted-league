@@ -15,8 +15,7 @@ function _(name, def, t) {
   }
   return orDefault();
 }
-
-module.exports = {
+const config = {
   env: _('ENV', 'dev'),
   github: {
     clientID: _('GITHUB_CLIENT_ID', 'github-client-id'),
@@ -24,7 +23,13 @@ module.exports = {
     callbackURL: _('GITHUB_REDIRECT_URI', 'http://127.0.0.1:8080/api/_github/callback'),
   },
   redis: {
-    url: _('REDIS_URI', 'redis://127.0.0.1:6379'),
+    host: _('REDIS_HOST', '127.0.0.1'),
+    port: _('REDIS_PORT', '6379'),
+  },
+  eventSourced: {
+    maxEvents: 10,
+    esPrefix: 'es',
+    projPrefix: 'proj',
   },
   app: {
     ownerId: 'github:5791952',
@@ -40,3 +45,5 @@ module.exports = {
     port: _('HTTP_PORT', 8000, int),
   },
 };
+
+module.exports = config;

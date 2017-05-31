@@ -1,12 +1,12 @@
+const config = require('../config').redis;
+
 const bluebird = require('bluebird');
 const redis = require('redis');
-
-const config = require('../config').redis;
 
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 
-const client = redis.createClient(config.url);
+const client = redis.createClient(`redis://${config.host}:${config.port}`);
 
 client.on('error', (err) => {
   console.log(`Error ${err}`);
@@ -43,7 +43,7 @@ const asJson = (e) => {
 };
 
 client.on('connect', () => {
-  console.log(`Connected to ${config.url}`);
+  console.log(`Connected to ${config.host}:${config.port}`);
 });
 
 

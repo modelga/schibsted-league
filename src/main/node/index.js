@@ -3,6 +3,7 @@ const express = require('express');
 const config = require('./config');
 
 const app = express();
+app.use(require('./es').express);
 
 app.use('/api', require('./api'));
 
