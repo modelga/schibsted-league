@@ -3,6 +3,7 @@ const { Event } = require('../Event');
 const config = require('../../config').eventSourced;
 const Events = require('events');
 const _ = require('lodash');
+class NotExists extends Error {}
 
 const ucFirst = string => string.charAt(0).toUpperCase() + string.slice(1);
 
@@ -15,12 +16,14 @@ class ProjectionStorage extends Events {
     return db.existsAsync(id)
       .then((r) => {
         if (r) { return; }
-        throw new Error(`Projection ${id} do not exists must be created explicitly first`);
+        throw new NotExists(`Projection '${id}' do not exists must be created explicitly first`);
       });
   }
   constructor(name, aggregateId) {
     super();
     this.projName = ProjectionStorage.id(name, aggregateId);
+    this.name = name; // family name
+    this.aggregateId = aggregateId;
     this.meta = {};
     this.iState = {};
     this.synced = false;
@@ -83,4 +86,4 @@ class ProjectionStorage extends Events {
   }
 }
 
-module.exports = ProjectionStorage;
+module.exports = { ProjectionStorage, NotExists };

@@ -1,8 +1,11 @@
 /* eslint global-require: "off"*/
+const { Event } = require('./Event');
+
 module.exports = {
+  Event,
   EventStorage: require('./EventStorage'),
   ProjectionManager: require('./ProjectionManager'),
   EventStream: require('./EventStream'),
-  ObserveStream: require('./ObserveStream'),
+  Stream: require('./Stream'),
   express: require('./express'),
 };

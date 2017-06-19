@@ -1,6 +1,8 @@
 const Events = require('events');
 const _ = require('lodash');
-const { factories, ProjectionStorage, exists } = require('./projections');
+const deferred = require('deferred')();
+
+const { factories, ProjectionStorage, exists, NotExists } = require('./projections');
 
 const gcConfigDefault = {
   idleTime: 10 * 1000,
@@ -15,6 +17,7 @@ class ProjectionManager extends Events {
     this.factories = Object.assign({}, factories, customFactories || {});
     this.projections = {};
     this.projectionIdles = {};
+    this.NotExists = NotExists;
 
     if (this.gc.gcRun > 0) {
       setInterval(() => this.emit('gc:run'), this.gc.gcRun);
@@ -32,6 +35,7 @@ class ProjectionManager extends Events {
         delete this.projections[k];
         delete this.projectionIdles[k];
       });
+      this.emit('gc:done', toRemove);
     });
 
     this.on('error', console.error);
@@ -43,7 +47,9 @@ class ProjectionManager extends Events {
       return this.projections[id];
     }
     if (this.factories[name]) {
-      return this.createProjection(name, aggregateId);
+      const d = deferred();
+      this.createProjection(name, aggregateId).on('ready', d.resolve);
+      return d.promise();
     }
     throw new Error(`Not found factory for projection ${name} (${aggregateId})`);
   }
@@ -52,7 +58,6 @@ class ProjectionManager extends Events {
     const id = ProjectionStorage.id(name, aggregateId);
     const p = this.factories[name](aggregateId);
     p.on('state', (state, updatedProjection) => {
-      console.log('updating the state');
       this.projections[id] = updatedProjection;
       this.projectionIdles[id] = new Date().getTime();
     });
@@ -61,14 +66,12 @@ class ProjectionManager extends Events {
 
   handle(name, aggregateId, event) {
     const p = this.findOrCreateProjection(name, aggregateId);
-    p.handle(event);
+    return p.handle(event);
   }
 
   projection(name, aggregateId) {
     return exists(name, aggregateId)
-      .then(() => {
-        this.findOrCreateProjection(name, aggregateId);
-      });
+      .then(() => this.findOrCreateProjection(name, aggregateId));
   }
 }
 

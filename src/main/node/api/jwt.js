@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config').jwt;
 const { user, level } = require('../db');
 
-const tpl = token => `
+const template = token => `
   <html>
     <head>
       <title>JWT Token</title>
@@ -21,7 +21,7 @@ const tpl = token => `
 const auth = (req, res) => {
   if (req.user) {
     const token = jwt.sign(req.user, config.secret, config.opt);
-    res.send(tpl(token));
+    res.send(template(token));
   }
 };
 
@@ -30,14 +30,14 @@ const protect = (req, res, next) => {
   if (token) {
     jwt.verify(token, config.secret, config.opt, (err, decoded) => {
       if (err) {
-        res.send(401, `Unauthorized: ${err.message}`);
+        res.status(401).send(`Unauthorized: ${err.message}`);
         return;
       }
       req.user = decoded;
       next();
     });
   } else {
-    res.send(401);
+    res.status(401).send('Unauthorized: no token provided');
   }
 };
 

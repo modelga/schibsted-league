@@ -3,12 +3,9 @@ const express = require('express');
 const app = express.Router();
 
 app.get('/:id', (req, res) => {
-  console.log(req.projection('league', req.params.id));
-  res.send('ok');
+  req.projection('league', req.params.id)
+    .then(p => res.send(p.state()))
+    .catch(req.manager.NotExists, () => res.status(404).send('Not Found'));
 });
 
-app.get('/', (req, res) => {
-  console.log(req.projection('league', req.params.id));
-  res.send('ok');
-});
 module.exports = app;

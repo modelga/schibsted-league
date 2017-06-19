@@ -1,6 +1,5 @@
 /* eslint-env node, mocha */
 const base = '../../../main/node';
-
 require('../config');
 require('should');
 const _ = require('lodash');
@@ -9,7 +8,6 @@ const { db, toJson } = require(`${base}/db/db`);
 const { EventStream } = require(`${base}/es/EventStream`);
 
 describe('EventStream', () => {
-  let stream;
   before((done) => {
     const payload = {};
     const data = {
@@ -31,48 +29,69 @@ describe('EventStream', () => {
   });
 
   describe('should set-up event stream', () => {
-    it('instance created', () => {
-      stream = new EventStream();
+    it('instance created', (done) => {
+      const stream = new EventStream();
       stream.should.be.instanceOf(EventStream);
-      stream.destroy();
+      setTimeout(() => { stream.destroy(); done(); }, 10);
     });
+
     it('listen on events', (done) => {
       let events = 0;
-      stream = new EventStream();
-      stream.events(0)(() => {
+      const stream = new EventStream();
+      stream.events(() => {
         if (++events === 6) { // eslint-disable-line
           stream.destroy();
           done();
         }
       });
     });
-    it('listen on events with preservation', (done) => {
-      let events = 0;
-      stream = new EventStream(0, true);
-      stream.events(0);
-      stream.start();
-      setTimeout(() => {
-        stream.listenTo((a) => {
-          if (++events === 6) { // eslint-disable-line
-            stream.destroy();
-            done();
-          }
-        });
-      }, 20);
-    });
+
     it('listen watch on new events', (done) => {
-      stream = new EventStream(0, false);
-      stream.events(0);
-      stream.start();
-      stream.listenTo(() => {
+      const stream = new EventStream();
+      stream.events((e) => {
+        if (e.meta.source === 'es:league-2' && e.payload === 'thisEvent') {
+          stream.destroy();
+          done();
+        }
+      });
+      db.rpush('es:league-2', toJson({ name: 'found', time: 5, payload: 'thisEvent' }));
+    });
+
+    it('listen on events with defined meta', (done) => {
+      let ev1 = 0;
+      let ev2 = 0;
+      const meta = { 'es:league-1': { index: 1 }, 'es:league-2': { index: 2 } };
+      const stream = new EventStream(meta, 'es:league-1,es:league-2');
+      const fail = setTimeout(() => {
         stream.destroy();
+        done(new Error(`Failing got ${ev1 + ev2} events`));
+      }, 4);
+      stream.events((e) => {
+        if (e.meta.source === 'es:league-1') ev1++;
+        if (e.meta.source === 'es:league-2') ev2++;
+        if (ev1 === 1 && ev2 === 3) { // eslint-disable-line
+          stream.destroy();
+          clearTimeout(fail);
+          done();
+        }
+      });
+    });
+    it('listen on up-to-date', (done) => {
+      const meta = { 'es:league-1': { index: 2 }, 'es:league-2': { index: 2 } };
+      const stream = new EventStream(meta, 'es:league-1,es:league-2');
+      const fail = setTimeout(() => {
+        stream.destroy();
+        done(new Error('Failed after 20 ms'));
+      }, 20);
+      stream.stream.once('up-to-date', (e) => {
+        stream.destroy();
+        clearTimeout(fail);
         done();
       });
-      db.rpush('es:league-2', toJson({ name: 'found', time: 5, payload: {} }));
+      stream.start();
     });
   });
 
   after(() => {
-    stream.destroy();
   });
 });

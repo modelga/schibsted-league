@@ -1,20 +1,19 @@
 const { db } = require('../db');
-
 const config = require('../config').eventSourced;
-
-const ObserveStream = require('./ObserveStream');
-const Event = require('./Event');
-// const config = require('../config').eventSourced;
+const ObserveStream = require('./Stream');
+const { Event } = require('./Event');
+const _ = require('lodash');
 
 class EventStorage {
-  constructor(name, aggregateId) {
-    this.name = name;
-    this.aggregateId = aggregateId;
-    this.storage = `${config.esPrefix}:${name}-${aggregateId}`;
+  constructor(storages) {
+    this.storages = _.mapValues(storages,
+      s => ({
+        name: `${config.esPrefix}:${s.name}-${s.aggregateId}`,
+      }));
   }
 
-  events(listener, index) {
-    return new ObserveStream(this.storage, { index }, listener);
+  events(listener) {
+    return new ObserveStream(this.storage, listener);
   }
 
   store(event) {

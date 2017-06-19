@@ -4,7 +4,7 @@ const base = '../../../main/node';
 require('../config');
 require('should');
 
-const ProjectionStorage = require(`${base}/es/projections/ProjectionStorage`);
+const { ProjectionStorage } = require(`${base}/es/projections/ProjectionStorage`);
 const { Event } = require(`${base}/es/Event`);
 const { db } = require(`${base}/db/db`);
 const { projPrefix } = require(`${base}/config`).eventSourced;

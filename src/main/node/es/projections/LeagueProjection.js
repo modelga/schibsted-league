@@ -1,6 +1,6 @@
 /* eslint class-methods-use-this: "off"*/
 
-const ProjectionStorage = require('./ProjectionStorage');
+const { ProjectionStorage } = require('./ProjectionStorage');
 
 class LeagueProjection extends ProjectionStorage {
   constructor(aggregateId) {

@@ -1,8 +1,7 @@
 /* eslint global-require: "off"*/
 
 const as = function (Class) { return (id => new Class(id)); };
-const ProjectionStorage = require('./ProjectionStorage');
-
+const { ProjectionStorage, NotExists } = require('./ProjectionStorage');
 
 module.exports = {
   factories: {
@@ -10,4 +9,5 @@ module.exports = {
   },
   exists: ProjectionStorage.exists,
   ProjectionStorage,
+  NotExists,
 };
