@@ -3,6 +3,7 @@ const { Event } = require('../Event');
 const config = require('../../config').eventSourced;
 const Events = require('events');
 const _ = require('lodash');
+
 class NotExists extends Error {}
 
 const ucFirst = string => string.charAt(0).toUpperCase() + string.slice(1);
@@ -61,7 +62,7 @@ class ProjectionStorage extends Events {
       this.meta[event.meta.source] = event.meta.index;
       const eventHandler = this[handleId];
       if (eventHandler && eventHandler instanceof Function) {
-        return this.updateState(eventHandler.call(this, this.state(), event.payload));
+        return this.updateState(eventHandler.call(this, this.state(), event.payload, event.meta));
       }
       return Promise.reject(new Error(`unhadled event expected on ${handleId}`));
     }

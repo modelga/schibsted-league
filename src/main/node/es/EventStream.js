@@ -20,7 +20,7 @@ class EventStream {
   }
   keys(now) {
     const keysList = () => {
-      if (this.key.length === 1) {
+      if (this.key.length === 1 && this.key[0].indexOf('*') !== -1) {
         return db.keysAsync(this.key[0]);
       }
       return Promise.resolve(this.key);
@@ -41,6 +41,9 @@ class EventStream {
     });
     this.observers[key] = { stream, key, upToDate: false, index: meta.index || 0 };
     stream.on('up-to-date', this.updateSync.bind(this));
+    stream.on('behind', () => {
+      this.observers[key].upToDate = false;
+    });
   }
   updateSync(data) {
     this.observers[data.name].upToDate = true;
@@ -50,6 +53,14 @@ class EventStream {
       this.stream.emit('up-to-date',
       _.map(this.observers, o => ({ source: o.key, index: o.lastIndex })));
     }
+  }
+  store(events, family) {
+    const store = o => o.stream.push(events)
+                        .then(() => o.stream.updateSize());
+    if (_.size(this.observers) === 1) {
+      return Promise.all(_.map(this.observers, store));
+    }
+    return Promise.all(_.chain(this.observers).filter(o => !family || o.stream.family() === family).map(store).value());
   }
   retain(key) {
     this.observers[key].destroy();
@@ -63,10 +74,11 @@ class EventStream {
       const callback = () => {
         if (!this.destroyed) {
           this.keys(new Date().getTime());
-          setTimeout(callback, 5);
+          setTimeout(callback, 13);
         }
       };
-      setTimeout(callback, 5);
+      setImmediate(callback);
+      return this;
     });
   }
   events(listener) {

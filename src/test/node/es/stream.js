@@ -47,18 +47,18 @@ describe('single stream', () => {
         stream.destroy();
       }
     });
-    db.rpush('es:league-2', toJson(newEvent));
+    stream.push(toJson(newEvent));
   });
 
   it('should receive future on new listener', (done) => {
     const newEvent = { time: 7 };
     const stream = new Stream('es:league-2', 0, (e) => {
-      if (e.time === 6) {
+      if (e.time === 7) {
         done();
         stream.destroy();
       }
     });
-    db.rpush('es:league-2', toJson(newEvent));
+    stream.push(toJson(newEvent));
   });
 
 

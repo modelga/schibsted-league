@@ -1,15 +1,16 @@
 const express = require('express');
 const ProjectionManager = require('./ProjectionManager');
-const handler = require('./CommandHandler');
+const { CommandHandler } = require('./command');
 
-const app = express();
+const handler = new CommandHandler();
+const plugin = new express.Router();
 const manager = ProjectionManager();
 
-app.use((req, res, next) => {
+plugin.use((req, res, next) => {
   req.manager = manager;
   req.projection = manager.projection.bind(manager);
   req.handle = cmd => handler.process(cmd, manager);
   next();
 });
 
-module.exports = app;
+module.exports = { handler, express: plugin, manager };

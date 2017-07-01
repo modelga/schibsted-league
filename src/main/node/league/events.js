@@ -1,8 +1,8 @@
-const { Event } = require('../Event');
+const { Event } = require('../es');
 
 class LeagueCreated extends Event {
-  constructor(name, type) {
-    super('created', { name, type });
+  constructor(owner, name, type) {
+    super('created', { owner, name, type });
   }
 }
 

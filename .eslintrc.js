@@ -16,7 +16,8 @@ module.exports = {
     'import/extensions': ['error', 'always', {
       'js': 'never',
     }],
-    'class-methods-use-this': "warn", 
+    'class-methods-use-this': "warn",
+    'no-underscore-dangle': ["error", { "allow": ["_state"] }],
     'import/no-dynamic-require': "off",
     'max-len': ['error', 120],
     // allow optionalDependencies

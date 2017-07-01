@@ -5,9 +5,10 @@ const { ProjectionStorage, NotExists } = require('./ProjectionStorage');
 
 module.exports = {
   factories: {
-    league: as(require('./LeagueProjection')),
+//    league: as(require('../../league/LeagueProjection')),
   },
   exists: ProjectionStorage.exists,
   ProjectionStorage,
   NotExists,
+  as,
 };

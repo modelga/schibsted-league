@@ -1,7 +1,6 @@
 /* eslint-env node, mocha */
 require('./config');
 require('should');
-
 const { user } = require('../../main/node/db');
 
 describe('a test', () => {

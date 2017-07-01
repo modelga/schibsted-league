@@ -1,11 +1,10 @@
 /* eslint global-require: "off"*/
-const { Event } = require('./Event');
+const { ProjectionStorage } = require('./projections/ProjectionStorage');
 
-module.exports = {
-  Event,
+module.exports = Object.assign({
+  ProjectionStorage,
   EventStorage: require('./EventStorage'),
   ProjectionManager: require('./ProjectionManager'),
   EventStream: require('./EventStream'),
   Stream: require('./Stream'),
-  express: require('./express'),
-};
+}, require('./express'), require('./Event'));

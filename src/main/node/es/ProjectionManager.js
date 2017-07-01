@@ -1,8 +1,8 @@
 const Events = require('events');
 const _ = require('lodash');
-const deferred = require('deferred')();
+const deferred = require('deferred');
 
-const { factories, ProjectionStorage, exists, NotExists } = require('./projections');
+const { factories, ProjectionStorage, exists, NotExists, as } = require('./projections');
 
 const gcConfigDefault = {
   idleTime: 10 * 1000,
@@ -72,6 +72,9 @@ class ProjectionManager extends Events {
   projection(name, aggregateId) {
     return exists(name, aggregateId)
       .then(() => this.findOrCreateProjection(name, aggregateId));
+  }
+  declare(name, c) {
+    this.factories = Object.assign({}, this.factories, { [name]: as(c) });
   }
 }
 

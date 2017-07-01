@@ -2,6 +2,7 @@ const { Event } = require('./Event');
 const Events = require('events');
 const { db } = require('../db');
 const config = require('../config').eventSourced;
+const _ = require('lodash');
 
 module.exports = class Stream {
   constructor(name, since, listener, preserve) {
@@ -30,7 +31,8 @@ module.exports = class Stream {
     this.preserved.forEach(listener);
   }
   push(...events) {
-    db.rpush(this.name, events);
+    const toStore = _.flatten(events).map((e) => { if (e instanceof Event) return e.toJson(); return e; });
+    return db.rpushAsync(this.name, toStore);
   }
   updateSize() {
     return db.llenAsync(this.name)
@@ -49,6 +51,7 @@ module.exports = class Stream {
         }
       }
       this.size = size;
+      return size;
     });
   }
   on(ev, l) {
@@ -62,7 +65,7 @@ module.exports = class Stream {
           this.interval = setInterval(() => {
             this.updateSize()
             .then(() => this.observe());
-          }, 13);
+          }, 2);
         }
       });
     });
