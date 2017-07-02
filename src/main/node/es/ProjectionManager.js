@@ -43,12 +43,14 @@ class ProjectionManager extends Events {
 
   findOrCreateProjection(name, aggregateId) {
     const id = ProjectionStorage.id(name, aggregateId);
-    if (this.projections[id]) {
-      return this.projections[id];
+    const lookup = this.projections[id];
+    if (lookup) {
+      setImmediate(() => lookup.emitState());
+      return lookup;
     }
     if (this.factories[name]) {
       const d = deferred();
-      this.createProjection(name, aggregateId).on('ready', d.resolve);
+      this.createProjection(name, aggregateId).once('ready', d.resolve);
       return d.promise();
     }
     throw new Error(`Not found factory for projection ${name} (${aggregateId})`);

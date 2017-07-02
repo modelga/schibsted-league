@@ -47,16 +47,11 @@ describe('ProjectionManager', () => {
        .catch(Error, e => done(e));
     });
 
-    it('should create an projection', (done) => {
-      manager.createProjection(name, id)
-      .once('ready', (created) => {
+    it('should create an projection and retrieve them', () => manager.findOrCreateProjection(name, id)
+      .then(created =>
         manager.projection(name, id)
-        .then((returned) => {
-          returned.should.equal(created);
-          done();
-        }).catch(done);
-      });
-    });
+        .should.fulfilledWith(created),
+      ));
 
     it('should mutate on event', () =>
       manager.handle(name, id, new Touch(1))

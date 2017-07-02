@@ -11,6 +11,9 @@ module.exports = class Command {
   events() {
     return [];
   }
+  creatable() {
+    return false;
+  }
   /**
   @return Promise
   */

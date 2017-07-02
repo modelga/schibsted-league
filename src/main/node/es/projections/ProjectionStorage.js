@@ -37,7 +37,7 @@ class ProjectionStorage extends Events {
     });
     this.save = _.debounce(() => this.saveImmediate('debounced'), 50, { maxWait: 250 });
     this.once('ready', () => {
-      this.emit('state', this.state, this);
+      setImmediate(() => this.emit('state', this.state, this));
     });
   }
   sync() {
@@ -80,6 +80,12 @@ class ProjectionStorage extends Events {
   }
   state() {
     return this.iState || {};
+  }
+  emitState() {
+    if (this.synced) {
+      setImmediate(() => this.emit('state', this.state, this));
+    }
+    return this;
   }
   destroy(cb) {
     this.removeAllListeners();

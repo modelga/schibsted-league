@@ -85,7 +85,12 @@ class CommandHandler {
   static projections(seed, manager, command) {
     return seed.then((found) => {
       const projections = CommandHandler.extract(command, found.proj)
-        .map(p => manager.projection(p.name, p.aggregateId));
+        .map((p) => {
+          if (command.creatable()) {
+            return manager.findOrCreateProjection(p.name, p.aggregateId);
+          }
+          return manager.projection(p.name, p.aggregateId);
+        });
       return Promise.all(projections)
         .then(p => _.keyBy(p, 'name'));
     });

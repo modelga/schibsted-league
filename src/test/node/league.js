@@ -2,13 +2,21 @@
 const base = '../../main/node';
 
 require('./config');
-const { handler, manager } = require(`${base}/es`);
-require(`${base}/league/LeagueProjection`);
+const { handle } = require(`${base}/es`);
+const { CreateLeague } = require(`${base}/league`);
 // league
+const owner = 'gh:1';
+const name = 'Fancy Schibsted League';
+const type = '1vs1';
 
 describe('league commands', () => {
-  manager.findOrCreateProjection('league', 1);
-  it('can be created');
+  const create = new CreateLeague(owner, name, type);
+  const id = create.id;
+  it('can be created', () => handle(create)
+    .then(({ league }) => {
+      console.log(league);
+    }));
+  it('should fail if try to create using the same id', () => handle(create));
   describe('meta changes', () => {
     it('can change description');
     it('can change name');

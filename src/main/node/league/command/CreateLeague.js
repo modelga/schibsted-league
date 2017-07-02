@@ -16,6 +16,9 @@ class CreateLeague extends Command {
     }
     throw new AccessDeniedError();
   }
+  creatable() {
+    return true;
+  }
   events() {
     return [new LeagueCreated(this.owner, this.name, this.type)];
   }
