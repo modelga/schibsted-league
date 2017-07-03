@@ -5,6 +5,9 @@ module.exports = class Command {
   constructor(aggregateId) {
     this.aggregateId = aggregateId;
   }
+  get id() {
+    return this.aggregateId;
+  }
   custom(name, type) {
     throw new Ex.CommandNotApplicableError(`Custom definition expected on ${type.toString()} ${name}`);
   }

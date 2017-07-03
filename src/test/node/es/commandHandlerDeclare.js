@@ -1,7 +1,9 @@
 /* eslint-env node, mocha */
 const base = '../../../main/node';
 const { InvalidCommandError, Command } = require(`${base}/es/command`);
-const { handler } = require(`${base}/es`);
+const { CommandHandler } = require(`${base}/es/command`);
+
+const handler = new CommandHandler();
 
 module.exports = () => describe('CommandHandler@declare', () => {
   it('should reject on invalid type of command', () => {

@@ -117,7 +117,11 @@ class CommandHandler {
         throw new Ex.InvalidCommandError('static declare method returns undefined');
       }
       if (_.isEmpty(es) || _.isEmpty(proj)) {
-        throw new Ex.InvalidCommandError(`es or proj list are empty for command ${c.name} declaration`);
+        if (_.isEmpty(c.declare())) {
+          throw new Ex.InvalidCommandError(`es or proj list are empty for command ${c.name} declaration`);
+        }
+        const common = c.declare();
+        return this.push(c, common, common);
       }
       return this.push(c, es, proj);
     }

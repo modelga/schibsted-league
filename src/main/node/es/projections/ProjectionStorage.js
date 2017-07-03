@@ -64,7 +64,8 @@ class ProjectionStorage extends Events {
       if (eventHandler && eventHandler instanceof Function) {
         return this.updateState(eventHandler.call(this, this.state(), event.payload, event.meta));
       }
-      return Promise.reject(new Error(`unhadled event expected on ${handleId}`));
+      console.debug(`unhadled event expected on ${handleId} in projection ${this.name}`);
+      return Promise.resolve(this.state());
     }
     return Promise.reject(new Error('not an event object'));
   }
@@ -74,9 +75,17 @@ class ProjectionStorage extends Events {
     this.emit('state', state, this);
     return Promise.resolve(state);
   }
+  /**
+   * save only when already entry exists (prevent storage of retained keys)
+   */
   saveImmediate(cause) { // eslint-disable-line
     const data = JSON.stringify({ state: this.state(), meta: this.meta });
-    return db.setAsync(this.projName, data);
+    return db.existsAsync(this.projName)
+    .then((exists) => {
+      if (exists || cause === 'initial') {
+        db.setAsync(this.projName, data);
+      }
+    });
   }
   state() {
     return this.iState || {};

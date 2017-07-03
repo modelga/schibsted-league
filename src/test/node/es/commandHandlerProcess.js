@@ -3,7 +3,9 @@ const base = '../../../main/node';
 require('../config');
 require('should');
 
-const { handler } = require(`${base}/es`);
+const { CommandHandler } = require(`${base}/es/command`);
+
+const handler = new CommandHandler();
 
 const { Command, Type,
    CommandNotApplicableError, CommandNotDeclaredError,

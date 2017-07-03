@@ -1,5 +1,6 @@
 /* eslint-disable global-require*/
 
 module.exports = Object.assign({}, {
-  Projection: require('./LeagueProjection'),
+  League: require('./League'),
+  UserLeague: require('./UserLeague'),
 }, require('./command'), require('./events'));

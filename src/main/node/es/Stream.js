@@ -21,7 +21,8 @@ module.exports = class Stream {
     this.init();
   }
   family() {
-    return this.name.replace(`${config.esPrefix}:`, '').split('-')[0];
+    const name = this.name.replace(`${config.esPrefix}:`, '');
+    return name.substr(0, name.lastIndexOf('-'));
   }
   listenTo(listener) {
     this.preserveMe(listener);
@@ -65,7 +66,7 @@ module.exports = class Stream {
           this.interval = setInterval(() => {
             this.updateSize()
             .then(() => this.observe());
-          }, 2);
+          }, 13);
         }
       });
     });

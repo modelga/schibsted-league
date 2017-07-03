@@ -40,7 +40,13 @@ class ProjectionManager extends Events {
 
     this.on('error', console.error);
   }
-
+  clean() {
+    _.each(this.projections, (v, k) => {
+      this.projections[k].destroy();
+      delete this.projections[k];
+      delete this.projectionIdles[k];
+    });
+  }
   findOrCreateProjection(name, aggregateId) {
     const id = ProjectionStorage.id(name, aggregateId);
     const lookup = this.projections[id];

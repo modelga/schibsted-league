@@ -14,4 +14,9 @@ Object.assign(dbModule, { db: redis.createClient() });
 
 bluebird.promisifyAll(Object.getPrototypeOf(dbModule.db));
 
-module.exports = config;
+module.exports = { config,
+  reset: () => {
+    redis.removeAllListeners();
+    return dbModule.db.keysAsync('*')
+      .then(keys => Promise.all((keys || []).map(k => dbModule.db.delAsync(k))));
+  } };

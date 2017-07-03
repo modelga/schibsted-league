@@ -71,13 +71,11 @@ describe('ProjectionStorage', () => {
       });
   });
 
-  it('projection should handle only related events', (done) => {
-    new CommandProjection(2)
+  it('projection should how change projection for unhandled messages', () => new CommandProjection(2)
         .once('ready', (p) => {
           p.handle(event3)
-          .catch(() => {
-            p.destroy(done);
+          .then((state) => {
+            state.should.equal(p.state());
           });
-        });
-  });
+        }));
 });
