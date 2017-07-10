@@ -55,12 +55,13 @@ class EventStream {
     }
   }
   store(events, family) {
-    const store = o => o.stream.push(events)
-                        .then(() => o.stream.updateSize());
-    if (_.size(this.observers) === 1) {
-      return Promise.all(_.map(this.observers, store));
+    const observers = _.filter(this.observers, (o => !family || o.stream.family() === family));
+    if (_.castArray(events).length > 0) {
+      const store = o => o.stream.push(events).then(() => o.stream.updateSize());
+      return Promise.all(_.map(observers, store));
     }
-    return Promise.all(_.chain(this.observers).filter(o => !family || o.stream.family() === family).map(store).value());
+    setImmediate(() => this.stream.emit('up-to-date'));
+    return Promise.resolve([0]);
   }
   retain(key) {
     this.observers[key].destroy();

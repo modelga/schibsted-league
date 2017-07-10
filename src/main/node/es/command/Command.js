@@ -3,6 +3,9 @@ const Type = require('./Type');
 
 module.exports = class Command {
   constructor(aggregateId) {
+    if (!aggregateId) {
+      throw new Error('invalid command aggreagateId:', aggregateId);
+    }
     this.aggregateId = aggregateId;
   }
   get id() {
@@ -14,14 +17,14 @@ module.exports = class Command {
   events() {
     return [];
   }
-  creatable() {
+  creating() {
     return false;
   }
   /**
   @return Promise
   */
-  applicable() {
-    return Promise.resolve(false);
+  async applicable() {
+    return false;
   }
   static customType(type) {
     const stringType = type === Type.EventStream ? 'event-stream' : 'projection';

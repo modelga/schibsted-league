@@ -1,14 +1,14 @@
 const ModeratorCommand = require('./ModeratorCommand');
 const { handler } = require('../../es');
-const { NameChanged } = require('../events');
+const { TypeChanged } = require('../events');
 
-module.exports = class ChangeName extends ModeratorCommand {
-  constructor(id, name) {
+module.exports = class ChangeType extends ModeratorCommand {
+  constructor(id, type) {
     super(id);
-    this.name = name;
+    this.type = type;
   }
   events() {
-    return [new NameChanged(this.name)];
+    return [new TypeChanged(this.type)];
   }
   static declare() {
     return ['league'];

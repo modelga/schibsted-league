@@ -4,6 +4,11 @@ const config = require('../../config').eventSourced;
 const Events = require('events');
 const _ = require('lodash');
 
+const extend = (state, ...others) => {
+  const cp = _.spread(Object.assign);
+  return cp([{}].concat(state || {}).concat(_.flatten(others)));
+};
+
 class NotExists extends Error {}
 
 const ucFirst = string => string.charAt(0).toUpperCase() + string.slice(1);
@@ -28,6 +33,9 @@ class ProjectionStorage extends Events {
     this.meta = {};
     this.iState = {};
     this.synced = false;
+    this.once('ready', () => {
+      setImmediate(() => this.emit('state', this.state, this));
+    });
     this.sync().then((data) => {
       const { state, meta } = data;
       this.iState = state;
@@ -36,19 +44,15 @@ class ProjectionStorage extends Events {
       data.postSync();
     });
     this.save = _.debounce(() => this.saveImmediate('debounced'), 50, { maxWait: 250 });
-    this.once('ready', () => {
-      setImmediate(() => this.emit('state', this.state, this));
-    });
   }
-  sync() {
-    return db.getAsync(this.projName).then((data) => {
-      const ready = () => this.emit('ready', this);
-      if (!data) {
-        this.iState = {};
-        return { state: this.initialState(), meta: {}, postSync: () => this.saveImmediate('initial').then(ready) };
-      }
-      return Object.assign({}, JSON.parse(data), { postSync: ready });
-    });
+  async sync() {
+    const data = await db.getAsync(this.projName);
+    const ready = () => this.emit('ready', this);
+    if (!data) {
+      this.iState = {};
+      return { state: this.initialState(), meta: {}, postSync: () => this.saveImmediate('initial').then(ready) };
+    }
+    return Object.assign({}, JSON.parse(data), { postSync: ready });
   }
   clean() {
     return db.delAsync(this.projName);
@@ -56,36 +60,40 @@ class ProjectionStorage extends Events {
   initialState() {
     return {};
   }
-  handle(event) {
+  async handle(event) {
     if (event && event instanceof Event) {
       const handleId = `handle${ucFirst(event.name)}`;
-      this.meta[event.meta.source] = event.meta.index;
+      this.meta[event.meta.source] = { index: event.meta.index };
       const eventHandler = this[handleId];
       if (eventHandler && eventHandler instanceof Function) {
-        return this.updateState(eventHandler.call(this, this.state(), event.payload, event.meta));
+        const toExtend = (...next) => extend(this.state(), next);
+        const newState = eventHandler.call(this, toExtend, event.payload, this.state(), event.meta);
+        if (newState) {
+          return this.updateState(newState);
+        }
+        return this.state();
       }
       console.debug(`unhadled event expected on ${handleId} in projection ${this.name}`);
-      return Promise.resolve(this.state());
+      return this.state();
     }
-    return Promise.reject(new Error('not an event object'));
+    throw new Error('not an event object');
   }
-  updateState(state) {
+  async updateState(state) {
     this.iState = state;
     this.save();
     this.emit('state', state, this);
-    return Promise.resolve(state);
+    return state;
   }
   /**
    * save only when already entry exists (prevent storage of retained keys)
    */
-  saveImmediate(cause) { // eslint-disable-line
+  async saveImmediate(cause) { // eslint-disable-line
     const data = JSON.stringify({ state: this.state(), meta: this.meta });
-    return db.existsAsync(this.projName)
-    .then((exists) => {
-      if (exists || cause === 'initial') {
-        db.setAsync(this.projName, data);
-      }
-    });
+    const exists = await db.existsAsync(this.projName);
+    if (exists || cause === 'initial') {
+      return db.setAsync(this.projName, data);
+    }
+    return false;
   }
   state() {
     return this.iState || {};
@@ -102,4 +110,4 @@ class ProjectionStorage extends Events {
   }
 }
 
-module.exports = { ProjectionStorage, NotExists };
+module.exports = { ProjectionStorage, NotExists, extend };

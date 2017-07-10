@@ -63,10 +63,32 @@ module.exports = () => describe('CommandHandler@declare', () => {
       e.message.should.match('es or proj list are empty for command C declaration');
     }
   });
+  it('should reject on empty array passed as proj definition', () => {
+    try {
+      class C extends Command {
+        static declare() {
+          return [];
+        }
+      }
+      handler.declare(C);
+      throw new Error('unexpected pass');
+    } catch (e) {
+      e.should.be.instanceOf(InvalidCommandError);
+      e.message.should.match('empty array passed for command C declaration');
+    }
+  });
   it('should pass on complete command', () => {
     class C extends Command {
       static declare() {
         return { es: ['es'], proj: ['proj'] };
+      }
+    }
+    handler.declare(C).p.should.equal(C.prototype);
+  });
+  it('should pass on complete command', () => {
+    class C extends Command {
+      static declare() {
+        return ['esAndProjDefinition'];
       }
     }
     handler.declare(C).p.should.equal(C.prototype);

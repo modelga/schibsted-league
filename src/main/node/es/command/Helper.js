@@ -1,4 +1,5 @@
 const Type = require('./Type');
+const _ = require('lodash');
 
 module.exports = class Helper {
   static projection(value) {
@@ -8,14 +9,16 @@ module.exports = class Helper {
     return Helper.commonResolver(value, Type.EventStream);
   }
   static commonResolver(value, base) {
-    const key = typeof value === 'string' ? value : Object.keys(value)[0];
+    const name = typeof value === 'string' ? value : Object.keys(value)[0];
     const type = typeof value === 'string' ? Type.AggreateId : Object.values(value)[0];
+    const rename = typeof value === 'object' ? value.rename : undefined;
+    const allowCreate = typeof value === 'object' ? value.allowCreate : false;
+    const addAggregate = aggregateId => ({ name, aggregateId, rename, allowCreate });
     switch (type) {
-      case Type.AggreateId: return id => ({ name: key, aggregateId: id });
-      case Type.Single: return () => ({ name: key, aggregateId: 'single' });
-      case Type.Custom: return (id, custom) => ({ name: key, aggregateId: custom(key, base) });
-      default:
-        return id => ({ name: key, aggregateId: id });
+      case Type.AggreateId: return id => addAggregate(id);
+      case Type.Single: return () => addAggregate('single');
+      case Type.Custom: return (id, custom) => addAggregate(custom(name, base));
+      default: return id => addAggregate(id);
     }
   }
 };

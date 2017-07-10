@@ -12,11 +12,14 @@ class UserLeagues extends ProjectionStorage {
       old: [],
     };
   }
-  handleUserToLeagueAdded(state, { id }) {
-    return Object.assign({}, state, { current: _.uniq(state.current.concat(id)) });
+  handleCreated(extend, { id }, { current }) {
+    return extend({ current: _.uniq(current.concat(id)) });
   }
-  handleLeagueComplete(state, { id }) {
-    return Object.assign({}, state);
+  handleLeagueCompleted(extend, { id }, { current, old }) {
+    return extend({
+      current: _.filter(current, c => c !== id),
+      old: _.uniq(old.concat(id)),
+    });
   }
 }
 manager.declare('userLeagues', UserLeagues);

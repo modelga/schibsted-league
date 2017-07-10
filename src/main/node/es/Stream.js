@@ -31,9 +31,11 @@ module.exports = class Stream {
   preserveMe(listener) {
     this.preserved.forEach(listener);
   }
-  push(...events) {
+  async push(...events) {
     const toStore = _.flatten(events).map((e) => { if (e instanceof Event) return e.toJson(); return e; });
-    return db.rpushAsync(this.name, toStore);
+    await db.rpushAsync(this.name, toStore);
+    await this.updateSize();
+    return this.observe();
   }
   updateSize() {
     return db.llenAsync(this.name)
@@ -63,10 +65,10 @@ module.exports = class Stream {
     .then(() => {
       this.observe().then(() => {
         if (this.alive) {
-          this.interval = setInterval(() => {
-            this.updateSize()
-            .then(() => this.observe());
-          }, 13);
+          this.interval = setInterval(async () => {
+            await this.updateSize();
+            return this.observe();
+          }, 25);
         }
       });
     });
@@ -82,7 +84,7 @@ module.exports = class Stream {
       raws.forEach((raw) => {
         this.index = this.index + 1;
         if (raw.time > this.since) {
-          const e = Event.of(raw, { source: this.name, index: this.index, family: this.family() });
+          const e = Event.of(raw, { id: raw.eventId, source: this.name, index: this.index, family: this.family() });
           if (this.preserve) {
             this.preserved.push(e);
           }

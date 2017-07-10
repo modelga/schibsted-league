@@ -1,15 +1,15 @@
 const { Command, AccessDeniedError, Type } = require('../../es/command');
 const { handler } = require('../../es');
-const { LeagueCreated, UserToLeagueAdded } = require('../events');
+const { LeagueCreated } = require('../events');
 const cuid = require('cuid');
 
 module.exports = class extends Command {
-  constructor(owner, name, type, description) {
+  constructor(p) {
+    if (!p.owner || !p.name || !p.type || !p.description) {
+      throw new Error('Lack of expected params', p);
+    }
     super(cuid());
-    this.owner = owner;
-    this.name = name;
-    this.type = type;
-    this.description = description;
+    this.payload = Object.assign({}, p, { id: this.id });
   }
   applicable({ league }) {
     if (league.state === 'pre-create') {
@@ -17,7 +17,7 @@ module.exports = class extends Command {
     }
     throw new AccessDeniedError();
   }
-  creatable() {
+  creating() {
     return true;
   }
   custom(field, type) {
@@ -27,8 +27,7 @@ module.exports = class extends Command {
     return super.custom(field, type);
   }
   events() {
-    return { league: [new LeagueCreated(this.owner, this.name, this.type, this.description)],
-      userLeagues: [new UserToLeagueAdded(this.id)] };
+    return { league: [new LeagueCreated(this.payload)], leagues: new LeagueCreated({ id: this.id }) };
   }
   static declare() {
     return ['league', { userLeagues: Type.Custom }];

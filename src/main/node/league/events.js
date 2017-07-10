@@ -1,30 +1,16 @@
-const { Event } = require('../es');
+const { simple, constructorPayload } = require('../es');
 
-module.exports.LeagueCreated = class extends Event {
-  constructor(owner, name, type, description) {
-    super('created', { owner, name, type, description });
-  }
-};
-
-module.exports.LeaguePlayerJoined = class extends Event {
-  constructor(user, team) {
-    super('playerJoined', { user, team });
-  }
-};
-module.exports.UserToLeagueAdded = class extends Event {
-  constructor(id) {
-    super('userToLeagueAdded', { id });
-  }
-};
-
-module.exports.DescriptionChanged = class extends Event {
-  constructor(description) {
-    super('descriptionChanged', { description });
-  }
-};
-
-module.exports.NameChanged = class extends Event {
-  constructor(name) {
-    super('nameChanged', { name });
-  }
-};
+module.exports.LeagueCreated = constructorPayload('created');
+module.exports.LeaguePlayerJoined = simple('nameChanged', 'id', 'team');
+module.exports.DescriptionChanged = simple('descriptionChanged', 'description');
+module.exports.NameChanged = simple('nameChanged', 'name');
+module.exports.Opened = simple('opened');
+module.exports.Closed = simple('closed');
+module.exports.Published = simple('published', 'id');
+module.exports.UnPublished = simple('unPublished', 'id');
+module.exports.RuleAdded = simple('ruleAdded', 'id', 'rule');
+module.exports.RuleDiscarded = simple('ruleDiscarded', 'id');
+module.exports.TypeChanged = simple('typeChanged', 'type');
+module.exports.PlayerAdded = constructorPayload('playerAdded');
+module.exports.Started = constructorPayload('started');
+module.exports.TeamUpdated = simple('teamUpdated', 'id', 'team');

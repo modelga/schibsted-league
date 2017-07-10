@@ -13,9 +13,11 @@ class CommandProjection extends ProjectionStorage {
   constructor(aggregateId) {
     super('name', aggregateId);
   }
-  handleCommand(state, payload) {
-    const payloads = state.payloads || [];
-    return Object.assign({}, this.state(), { payloads: payloads.concat(payload) });
+  initialState() {
+    return { payloads: [] };
+  }
+  handleCommand(extend, payload, { payloads }) {
+    return extend({ payloads: payloads.concat(payload) });
   }
 }
 
@@ -53,7 +55,7 @@ describe('ProjectionStorage', () => {
   it('another projection should not affect previous', (done) => {
     new CommandProjection(2)
       .once('ready', (p) => {
-        p.state().should.deepEqual({});
+        p.state().should.deepEqual({ payloads: [] });
         p.destroy(done);
       });
   });

@@ -1,18 +1,19 @@
 const { handler } = require('../../es');
+const { RuleAdded } = require('../events');
+const cuid = require('cuid');
 const ModeratorCommand = require('./ModeratorCommand');
-const { DescriptionChanged } = require('../events');
 
 module.exports = class extends ModeratorCommand {
-  constructor(id, description) {
+  constructor(id, rule) {
     super(id);
-    this.description = description;
+    this.ruleId = cuid();
+    this.rule = rule;
   }
   events() {
-    return [new DescriptionChanged(this.description)];
+    return [new RuleAdded(this.ruleId, this.rule)];
   }
   static declare() {
     return ['league'];
   }
 };
-
 handler.declare(module.exports);

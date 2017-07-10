@@ -63,7 +63,7 @@ describe('ProjectionManager', () => {
 
     it('meta should be updated', () =>
       manager.projection('fake', 1).then(p => p.meta)
-      .should.finally.deepEqual({ 'es:fakes': 1 }),
+      .should.finally.deepEqual({ 'es:fakes': { index: 1 } }),
     );
 
     describe('cleanum using gc:run', () => {
