@@ -161,7 +161,9 @@ describe('league commands', () => {
       .then(({ league }) => {
         league.state.should.equal('ongoing');
       }));
-    it('fail when try to run again');
+    it('fail when try to run again',
+    () => handle(new L.StartLeague(authorizedChange))
+    .should.be.rejectedWith(L.exceptions.BadRequest));
   });
 
   describe('matches', () => {

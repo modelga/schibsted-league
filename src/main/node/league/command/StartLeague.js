@@ -2,14 +2,15 @@ const { AccessDeniedError, Type } = require('../../es/command');
 const { handler } = require('../../es');
 const ModeratorCommand = require('./ModeratorCommand');
 const E = require('../events');
+const Ex = require('../exceptions');
 
 module.exports = class StartLeague extends ModeratorCommand {
   applicable({ league }) {
-    if (league.state !== 'create') {
-      return new AccessDeniedError('Cannot start league not in create state');
+    if (league.state !== 'created') {
+      throw new Ex.BadRequest('Cannot start league not in created state');
     }
     if (league.players.length < 2) {
-      return new AccessDeniedError('Cannot start league with only 1 player');
+      throw new Ex.BadRequest('Cannot start league with only 1 player');
     }
     return super.applicable({ league });
   }
